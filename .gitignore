@@ -1,0 +1,9 @@
+# Bỏ qua thư mục gen code của Nexacro
+/outputs/
+/generate/
+/Deploy/
+
+# Bỏ qua các file cấu hình máy cá nhân
+*.suo
+*.user
+*.nexacro

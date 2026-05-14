@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="Sign" width="1280" height="720" titletext="New application" background="#f0fdf4">
+    <Layouts>
+      <Layout height="720" mobileorientation="landscape" width="1280">
+        <Static id="sta_title" taborder="0" text="HEALTH APP REGISTER" left="37" top="21" width="300" height="30" font="bold 20px/normal &quot;Arial&quot;" color="#047857"/>
+        <Edit id="edt_fullname" taborder="1" left="37" top="71" width="253" height="30" borderRadius="8px" displaynulltext="Full name"/>
+        <Edit id="edt_password" taborder="2" left="37" top="111" width="253" height="30" borderRadius="8px" displaynulltext="Password" password="true"/>
+        <Edit id="edt_confirm_password" taborder="10" left="37" top="151" width="253" height="30" borderRadius="8px" displaynulltext="Confirm Password" password="true"/>
+        <Edit id="edt_phone" taborder="3" left="37" top="191" width="253" height="30" borderRadius="8px" displaynulltext="Phone"/>
+        <Edit id="edt_address" taborder="4" left="37" top="231" width="253" height="30" borderRadius="8px" displaynulltext="Address"/>
+        <Calendar id="cal_birthday" taborder="5" left="37" top="271" width="253" height="30" borderRadius="8px" displaynulltext="Birthday"/>
+        <Radio id="rdo_gender" taborder="9" left="37" top="311" width="253" height="30" innerdataset="innerdataset" codecolumn="codecolumn" datacolumn="datacolumn" columncount="2" color="#047857">
+          <Dataset id="innerdataset">
+            <ColumnInfo>
+              <Column id="codecolumn" size="256"/>
+              <Column id="datacolumn" size="256"/>
+            </ColumnInfo>
+            <Rows>
+              <Row>
+                <Col id="codecolumn">M</Col>
+                <Col id="datacolumn">Men</Col>
+              </Row>
+              <Row>
+                <Col id="codecolumn">F</Col>
+                <Col id="datacolumn">Woman</Col>
+              </Row>
+            </Rows>
+          </Dataset>
+        </Radio>
+        <CheckBox id="chk_agree" taborder="6" text="Yes, I have read and agree to the policies" left="37" top="351" width="300" height="25" color="#047857"/>
+        <Button id="btn_register" taborder="7" text="Register" left="37" top="395" width="120" height="40" onclick="btn_register_onclick" borderRadius="8px" background="#059669" color="#ffffff" font="bold 14px &quot;Arial&quot;"/>
+        <Button id="btn_cancel" taborder="8" text="Cancel" left="170" top="395" width="120" height="40" onclick="btn_cancel_onclick" borderRadius="8px" background="#fca5a5" color="#7f1d1d" font="bold 14px &quot;Arial&quot;"/>
+      </Layout>
+    </Layouts>
+    <Script type="xscript5.1"><![CDATA[this.btn_register_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+	// 1. Lấy toàn bộ dữ liệu từ các ô
+	var name = this.edt_fullname.value;
+	var pass = this.edt_password.value;
+	var confirm_pass = this.edt_confirm_password.value;
+	var phone = this.edt_phone.value;
+	var address = this.edt_address.value;
+	var birthday = this.cal_birthday.value;
+	var gender = this.rdo_gender.text;
+	var agree = this.chk_agree.value;
+	
+	// 2. Yêu cầu 1: KHÔNG ĐƯỢC BỎ TRỐNG TRƯỜNG NÀO
+	if (!name || !pass || !confirm_pass || !phone || !address || !birthday || !gender) {
+		alert("Ối! Bạn đang bỏ trống thông tin kìa. Vui lòng điền đầy đủ tất cả các trường nhé!");
+		return; 
+	}
+
+	// 3. KIỂM TRA NGÀY SINH LỢP LÝ
+	var today = new Date();
+	var currentYear = today.getFullYear();
+	var currentMonth = today.getMonth() + 1;
+	var currentDay = today.getDate();
+
+	// Ghép thành chuỗi YYYYMMDD để so sánh
+	var todayStr = currentYear.toString() + 
+				  (currentMonth < 10 ? "0" + currentMonth : currentMonth) + 
+				  (currentDay < 10 ? "0" + currentDay : currentDay);
+
+	if (birthday > todayStr) {
+		alert("Bạn đến từ tương lai à? Ngày sinh không hợp lệ!");
+		this.cal_birthday.setFocus();
+		return;
+	}
+
+	var birthYear = parseInt(birthday.substring(0, 4));
+	var age = currentYear - birthYear;
+
+	if (age > 120) {
+		alert("Năm sinh có vẻ không chính xác. Vui lòng nhập đúng năm sinh thật của bạn!");
+		this.cal_birthday.setFocus();
+		return;
+	}
+
+	if (age < 13) {
+		alert("Rất tiếc! Bạn phải từ đủ 13 tuổi trở lên mới được tạo hồ sơ sức khỏe.");
+		this.cal_birthday.setFocus();
+		return;
+	}
+
+	// 4. RÀNG BUỘC MẬT KHẨU SIÊU CẤP (Regex)
+	var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
+	
+	if (!strongRegex.test(pass)) {
+		alert("Mật khẩu quá yếu!\nYêu cầu: Ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (VD: @$!%*?&).");
+		this.edt_password.setFocus();
+		return;
+	}
+
+	// 5. MẬT KHẨU PHẢI KHỚP NHAU
+	if (pass !== confirm_pass) {
+		alert("Hai mật khẩu không giống nhau. Bạn gõ lại xem nào!");
+		this.edt_confirm_password.setFocus();
+		return;
+	}
+
+	// 6. Kiểm tra dấu tick đồng ý
+	if (agree != true) {
+		alert("Bạn phải đánh dấu đồng ý với chính sách bảo mật!");
+		return;
+	}
+	
+	// 7. CHỐT HẠ: Vượt qua mọi rào cản thì báo thành công và CHUYỂN TRANG
+	alert("Tuyệt vời! Đăng ký thành công. Chào mừng " + gender + " " + name + " đến với Health App!");
+	
+	// Đã gỡ comment, code sẽ tự động đưa người dùng sang phòng khám ảo
+	this.getOwnerFrame().set_formurl("FrameBase::Dashboard.xfdl");
+};
+
+this.btn_cancel_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+	var isConfirm = confirm("Chưa đăng ký xong mà, bạn có chắc chắn muốn thoát không?");
+	if(isConfirm){
+		// this.getOwnerFrame().set_formurl("FrameBase::Form_Work.xfdl");
+	}
+};]]></Script>
+    <Objects>
+      <Dataset id="ds_register">
+        <ColumnInfo>
+          <Column id="fullname" type="STRING" size="256"/>
+          <Column id="phone" type="STRING" size="256"/>
+          <Column id="password" type="STRING" size="256"/>
+          <Column id="birthday" type="STRING" size="256"/>
+          <Column id="gender" type="STRING" size="256"/>
+          <Column id="address" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row/>
+        </Rows>
+      </Dataset>
+    </Objects>
+    <Bind>
+      <BindItem id="item0" compid="edt_fullname" propid="value" datasetid="ds_register" columnid="fullname"/>
+      <BindItem id="item1" compid="edt_password" propid="value" datasetid="ds_register" columnid="password"/>
+      <BindItem id="item2" compid="edt_phone" propid="value" datasetid="ds_register" columnid="phone"/>
+      <BindItem id="item3" compid="edt_address" propid="value" datasetid="ds_register" columnid="address"/>
+      <BindItem id="item4" compid="cal_birthday" propid="value" datasetid="ds_register" columnid="birthday"/>
+      <BindItem id="item5" compid="rdo_gender" propid="value" datasetid="ds_register" columnid="gender"/>
+    </Bind>
+  </Form>
+</FDL>

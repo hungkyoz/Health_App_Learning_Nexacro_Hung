@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<FDL version="2.1">
+  <Form id="Dashboard" width="1280" height="720" titletext="Health Dashboard" background="#f0fdf4">
+    <Layouts>
+      <Layout height="720" mobileorientation="landscape" width="1280">
+        <Static id="sta_header" taborder="0" text="VIRTUAL HEALTH CLINIC" left="40" top="30" width="500" height="40" font="bold 24px/normal &quot;Arial&quot;" color="#047857"/>
+        <Static id="sta_desc" taborder="1" text="Enter your body metrics today for AI analysis" left="40" top="70" width="500" height="20" font="12px &quot;Arial&quot;" color="#065f46"/>
+        <Edit id="edt_height" taborder="2" left="40" top="110" width="200" height="40" borderRadius="8px" displaynulltext="Height (cm)" font="14px &quot;Arial&quot;"/>
+        <Edit id="edt_weight" taborder="3" left="260" top="110" width="200" height="40" borderRadius="8px" displaynulltext="Weight (kg)" font="14px &quot;Arial&quot;"/>
+        <Edit id="edt_heartrate" taborder="11" left="40" top="160" width="200" height="40" borderRadius="8px" displaynulltext="Heart Rate (bpm)" font="14px &quot;Arial&quot;"/>
+        <Edit id="edt_steps" taborder="12" left="260" top="160" width="200" height="40" borderRadius="8px" displaynulltext="Daily Steps" font="14px &quot;Arial&quot;"/>
+        <Button id="btn_calculate" taborder="4" text="ANALYZE HEALTH" left="40" top="220" width="420" height="50" background="#059669" color="#ffffff" font="bold 16px &quot;Arial&quot;" borderRadius="8px" onclick="btn_calculate_onclick"/>
+        <Static id="sta_result_bg" taborder="5" left="40" top="290" width="420" height="300" background="#ffffff" borderRadius="15px" boxShadow="0px 4px 10px rgba(0,0,0,0.05)" border="1px solid #d1fae5"/>
+        <Static id="sta_result_title" taborder="6" text="OVERVIEW RESULTS" left="60" top="305" width="380" height="30" font="bold 16px &quot;Arial&quot;" color="#047857" textAlign="center"/>
+        <Static id="sta_result_value" taborder="7" text="--" left="60" top="340" width="380" height="60" font="bold 40px &quot;Arial&quot;" color="#059669" textAlign="center"/>
+        <Static id="sta_result_status" taborder="8" text="No data available" left="60" top="410" width="380" height="30" font="bold 18px &quot;Arial&quot;" color="#374151" textAlign="center"/>
+        <Static id="sta_advice" taborder="9" text="Please fill in all 4 metrics above and click Analyze." left="60" top="450" width="380" height="120" font="italic 14px/1.5 &quot;Arial&quot;" color="#4b5563" textAlign="left" wordWrap="english" verticalAlign="top"/>
+        <Static id="sta_chart_title" taborder="13" text="BMI STATISTICS" left="500" top="70" width="300" height="20" font="bold 14px &quot;Arial&quot;" color="#047857"/>
+        <ImageViewer id="img_bmi_chart" taborder="14" left="500" top="110" width="700" height="380" stretch="fit" border="1px solid #d1fae5" borderRadius="15px" background="#ffffff" image="url('bmi_chart.png')"/>
+        <Button id="btn_logout" taborder="10" text="Logout" left="40" top="610" width="150" height="35" background="#fca5a5" color="#7f1d1d" borderRadius="8px" font="12px &quot;Arial&quot;" onclick="btn_logout_onclick"/>
+      </Layout>
+    </Layouts>
+    <Script type="xscript5.1"><![CDATA[// Đảm bảo Dataset có dòng để chứa dữ liệu khi form load
+this.Dashboard_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+	if (this.ds_health_metrics.getRowCount() == 0) {
+		this.ds_health_metrics.addRow();
+	}
+};
+
+// Xử lý khi bấm nút PHÂN TÍCH
+this.btn_calculate_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+	// 1. LẤY DỮ LIỆU TỪ DATASET CHUẨN NEXACRO
+	var h_cm = this.ds_health_metrics.getColumn(0, "height");
+	var w_kg = this.ds_health_metrics.getColumn(0, "weight");
+	var hr = this.ds_health_metrics.getColumn(0, "heartrate");
+	var steps = this.ds_health_metrics.getColumn(0, "steps");
+	
+	// Bắt lỗi rỗng
+	if (!h_cm || !w_kg || !hr || !steps) {
+		alert("Please enter all 4 metrics for accurate analysis!");
+		return;
+	}
+	
+	// Tính BMI
+	var h_m = Number(h_cm) / 100;
+	var w = Number(w_kg);
+	var bmi = w / (h_m * h_m);
+	var bmiRounded = nexacro.round(bmi, 1);
+	
+	this.sta_result_value.set_text("BMI: " + bmiRounded);
+	
+	var status = "";
+	var color = "";
+	var adviceText = "";
+	
+	// Phân tích BMI
+	if (bmi < 18.5) {
+		status = "UNDERWEIGHT"; color = "#f59e0b";
+		adviceText += "- Weight: Need more protein and carbs.\n";
+	} else if (bmi >= 18.5 && bmi <= 24.9) {
+		status = "NORMAL"; color = "#059669";
+		adviceText += "- Weight: Ideal, keep it up!\n";
+	} else {
+		status = "OVERWEIGHT"; color = "#ef4444";
+		adviceText += "- Weight: You need to reduce calorie intake.\n";
+	}
+	
+	// Phân tích Nhịp tim
+	var heartRate = Number(hr);
+	if (heartRate < 60) {
+		adviceText += "- Heart Rate: Slightly slow (" + heartRate + " bpm).\n";
+	} else if (heartRate > 100) {
+		adviceText += "- Heart Rate: Fast (" + heartRate + " bpm), please relax!\n";
+		status = "HEART WARNING"; color = "#b91c1c"; // Cảnh báo đỏ nếu tim đập nhanh
+	} else {
+		adviceText += "- Heart Rate: Normal, stable rhythm.\n";
+	}
+	
+	// Phân tích Vận động
+	var stepCount = Number(steps);
+	if (stepCount < 5000) {
+		adviceText += "- Activity: Too low! Stand up and walk more.";
+	} else if (stepCount >= 5000 && stepCount < 10000) {
+		adviceText += "- Activity: Good, try to reach 10,000 steps.";
+	} else {
+		adviceText += "- Activity: Excellent! You are very active.";
+	}
+	
+	// Cập nhật kết quả lên màn hình
+	this.sta_result_status.set_text(status);
+	this.sta_result_status.set_color(color);
+	this.sta_result_value.set_color(color);
+	this.sta_advice.set_text(adviceText);
+};
+
+// Xử lý Đăng xuất
+this.btn_logout_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
+{
+	var isConfirm = confirm("Are you sure you want to logout?");
+	if(isConfirm) {
+		// Dọn sạch dữ liệu cũ trước khi thoát
+		this.ds_health_metrics.clearData();
+		this.sta_result_value.set_text("--");
+		this.sta_result_status.set_text("No data available");
+		this.sta_advice.set_text("Please fill in all 4 metrics above and click Analyze.");
+		
+		// Trở về trang Đăng nhập
+		this.getOwnerFrame().set_formurl("FrameBase::Form_Work.xfdl");
+	}
+};]]></Script>
+    <Objects>
+      <Dataset id="ds_health_metrics">
+        <ColumnInfo>
+          <Column id="height" type="STRING" size="256"/>
+          <Column id="weight" type="STRING" size="256"/>
+          <Column id="heartrate" type="STRING" size="256"/>
+          <Column id="steps" type="STRING" size="256"/>
+        </ColumnInfo>
+        <Rows>
+          <Row/>
+        </Rows>
+      </Dataset>
+    </Objects>
+    <Bind>
+      <BindItem id="item0" compid="edt_height" propid="value" datasetid="ds_health_metrics" columnid="height"/>
+      <BindItem id="item1" compid="edt_weight" propid="value" datasetid="ds_health_metrics" columnid="weight"/>
+      <BindItem id="item2" compid="edt_heartrate" propid="value" datasetid="ds_health_metrics" columnid="heartrate"/>
+      <BindItem id="item3" compid="edt_steps" propid="value" datasetid="ds_health_metrics" columnid="steps"/>
+    </Bind>
+  </Form>
+</FDL>
