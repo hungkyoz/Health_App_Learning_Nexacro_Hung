@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FDL version="2.1">
-  <Form id="Sign" width="1280" height="720" titletext="New application" background="#f0fdf4">
+  <Form id="Sign" width="1280" height="720" titletext="New application" background="#f0fdf4" onload="Sign_onload">
     <Layouts>
       <Layout height="720" mobileorientation="landscape" width="1280">
         <Static id="sta_title" taborder="0" text="HEALTH APP REGISTER" left="37" top="21" width="300" height="30" font="bold 20px/normal &quot;Arial&quot;" color="#047857"/>
@@ -35,7 +35,6 @@
     </Layouts>
     <Script type="xscript5.1"><![CDATA[this.btn_register_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 {
-	// 1. Lấy toàn bộ dữ liệu từ các ô
 	var name = this.edt_fullname.value;
 	var pass = this.edt_password.value;
 	var confirm_pass = this.edt_confirm_password.value;
@@ -44,20 +43,14 @@
 	var birthday = this.cal_birthday.value;
 	var gender = this.rdo_gender.text;
 	var agree = this.chk_agree.value;
-	
-	// 2. Yêu cầu 1: KHÔNG ĐƯỢC BỎ TRỐNG TRƯỜNG NÀO
 	if (!name || !pass || !confirm_pass || !phone || !address || !birthday || !gender) {
 		alert("Ối! Bạn đang bỏ trống thông tin kìa. Vui lòng điền đầy đủ tất cả các trường nhé!");
 		return; 
 	}
-
-	// 3. KIỂM TRA NGÀY SINH LỢP LÝ
 	var today = new Date();
 	var currentYear = today.getFullYear();
 	var currentMonth = today.getMonth() + 1;
 	var currentDay = today.getDate();
-
-	// Ghép thành chuỗi YYYYMMDD để so sánh
 	var todayStr = currentYear.toString() + 
 				  (currentMonth < 10 ? "0" + currentMonth : currentMonth) + 
 				  (currentDay < 10 ? "0" + currentDay : currentDay);
@@ -82,8 +75,6 @@
 		this.cal_birthday.setFocus();
 		return;
 	}
-
-	// 4. RÀNG BUỘC MẬT KHẨU SIÊU CẤP (Regex)
 	var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$");
 	
 	if (!strongRegex.test(pass)) {
@@ -91,24 +82,17 @@
 		this.edt_password.setFocus();
 		return;
 	}
-
-	// 5. MẬT KHẨU PHẢI KHỚP NHAU
 	if (pass !== confirm_pass) {
 		alert("Hai mật khẩu không giống nhau. Bạn gõ lại xem nào!");
 		this.edt_confirm_password.setFocus();
 		return;
 	}
-
-	// 6. Kiểm tra dấu tick đồng ý
 	if (agree != true) {
 		alert("Bạn phải đánh dấu đồng ý với chính sách bảo mật!");
 		return;
 	}
-	
-	// 7. CHỐT HẠ: Vượt qua mọi rào cản thì báo thành công và CHUYỂN TRANG
 	alert("Tuyệt vời! Đăng ký thành công. Chào mừng " + gender + " " + name + " đến với Health App!");
-	
-	// Đã gỡ comment, code sẽ tự động đưa người dùng sang phòng khám ảo
+
 	this.getOwnerFrame().set_formurl("FrameBase::Dashboard.xfdl");
 };
 
@@ -118,7 +102,12 @@ this.btn_cancel_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 	if(isConfirm){
 		// this.getOwnerFrame().set_formurl("FrameBase::Form_Work.xfdl");
 	}
-};]]></Script>
+};
+this.Sign_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+{
+	
+};
+]]></Script>
     <Objects>
       <Dataset id="ds_register">
         <ColumnInfo>

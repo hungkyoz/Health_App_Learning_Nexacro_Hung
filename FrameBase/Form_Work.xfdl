@@ -16,17 +16,13 @@
     </Layouts>
     <Script type="xscript5.1"><![CDATA[this.Form_Work_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
 {
-	// Đảm bảo Dataset luôn có 1 dòng trống để chứa dữ liệu
 	if (this.ds_login.getRowCount() == 0) {
 		this.ds_login.addRow();
 	}
-	
-	// Tính năng: Lấy thông tin Ghi nhớ đăng nhập
 	var savedPhone = nexacro.getPrivateProfile("saved_phone");
 	var savedPass = nexacro.getPrivateProfile("saved_pass");
 	
 	if (savedPhone && savedPass) {
-		// Nhồi dữ liệu cũ vào Dataset, giao diện sẽ tự động cập nhật theo
 		this.ds_login.setColumn(0, "phone", savedPhone);
 		this.ds_login.setColumn(0, "password", savedPass);
 		this.chk_remember.set_value(true);
@@ -35,7 +31,6 @@
 
 this.btn_login_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 {
-	// Chuẩn Nexacro: Lấy dữ liệu từ Dataset chứ không lấy từ ô Edit nữa
 	var phone = this.ds_login.getColumn(0, "phone");
 	var pass = this.ds_login.getColumn(0, "password");
 	var isRemember = this.chk_remember.value;
@@ -44,8 +39,6 @@ this.btn_login_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 		alert("Vui lòng nhập Số điện thoại và Mật khẩu!");
 		return;
 	}
-	
-	// Lưu hoặc xóa thông tin ghi nhớ
 	if (isRemember) {
 		nexacro.setPrivateProfile("saved_phone", phone);
 		nexacro.setPrivateProfile("saved_pass", pass);
@@ -53,7 +46,6 @@ this.btn_login_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 		nexacro.setPrivateProfile("saved_phone", "");
 		nexacro.setPrivateProfile("saved_pass", "");
 	}
-	
 	alert("Đăng nhập thành công!");
 	this.getOwnerFrame().set_formurl("FrameBase::Dashboard.xfdl");
 };

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <FDL version="2.1">
-  <Form id="Dashboard" width="1280" height="720" titletext="Health Dashboard" background="#f0fdf4" onload="Dashboard_onload">
+  <Form id="Dashboard" width="1280" height="720" titletext="Health Dashboard" background="#f0fdf4">
     <Layouts>
       <Layout height="720" mobileorientation="landscape" width="1280">
         <Static id="sta_header" taborder="0" text="VIRTUAL HEALTH CLINIC" left="40" top="30" width="500" height="40" font="bold 24px/normal &quot;Arial&quot;" color="#047857"/>
@@ -16,73 +16,30 @@
         <Static id="sta_result_status" taborder="8" text="No data available" left="60" top="410" width="380" height="30" font="bold 18px &quot;Arial&quot;" color="#374151" textAlign="center"/>
         <Static id="sta_advice" taborder="9" text="Please fill in all 4 metrics above and click Analyze." left="60" top="450" width="380" height="120" font="italic 14px/1.5 &quot;Arial&quot;" color="#4b5563" textAlign="left" wordWrap="english" verticalAlign="top"/>
         <Static id="sta_chart_title" taborder="13" text="BMI STATISTICS" left="500" top="70" width="300" height="20" font="bold 14px &quot;Arial&quot;" color="#047857"/>
-        <ImageViewer id="img_bmi_chart" taborder="14" left="530" top="110" width="670" height="320" stretch="fit" border="1px solid #d1fae5" borderRadius="15px" background="#ffffff" image="url('bmi_chart.png')"/>
+        <ImageViewer id="img_bmi_chart" taborder="14" left="500" top="110" width="700" height="380" stretch="fit" border="1px solid #d1fae5" borderRadius="15px" background="#ffffff" image="url('bmi_chart.png')"/>
         <Button id="btn_logout" taborder="10" text="Logout" left="40" top="610" width="150" height="35" background="#fca5a5" color="#7f1d1d" borderRadius="8px" font="12px &quot;Arial&quot;" onclick="btn_logout_onclick"/>
-        <Grid id="Grid00" taborder="15" left="530" top="445" width="556" height="145" binddataset="ds_history" oncellclick="grd_history_oncellclick">
-          <Formats>
-            <Format id="default">
-              <Columns>
-                <Column size="80"/>
-                <Column size="80"/>
-                <Column size="80"/>
-                <Column size="80"/>
-                <Column size="80"/>
-                <Column size="80"/>
-                <Column size="100"/>
-                <Column size="80" band="right"/>
-              </Columns>
-              <Rows>
-                <Row size="24" band="head"/>
-                <Row size="24"/>
-              </Rows>
-              <Band id="head">
-                <Cell text="Date"/>
-                <Cell col="1" text="Height"/>
-                <Cell col="2" text="Weight"/>
-                <Cell col="3" text="Heart Rate"/>
-                <Cell col="4" text="Steps"/>
-                <Cell col="5" text="BMI"/>
-                <Cell col="6" text="Status"/>
-                <Cell col="7" text="Action"/>
-              </Band>
-              <Band id="body">
-                <Cell text="bind:date"/>
-                <Cell col="1" text="bind:height"/>
-                <Cell col="2" text="bind:weight"/>
-                <Cell col="3" text="bind:heartrate"/>
-                <Cell col="4" text="bind:steps"/>
-                <Cell col="5" text="bind:bmi"/>
-                <Cell col="6" text="bind:status" color="expr:colorCode" font="bold 12px 'Arial'"/>
-                <Cell col="7" displaytype="buttoncontrol" text="Delete"/>
-              </Band>
-            </Format>
-          </Formats>
-        </Grid>
       </Layout>
     </Layouts>
-    <Script type="xscript5.1"><![CDATA[// 1. Đảm bảo Dataset có dòng để chứa dữ liệu khi form load
-this.Dashboard_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
+    <Script type="xscript5.1"><![CDATA[this.Dashboard_onload = function(obj:nexacro.Form,e:nexacro.LoadEventInfo)
 {
 	if (this.ds_health_metrics.getRowCount() == 0) {
 		this.ds_health_metrics.addRow();
 	}
 };
 
-// 2. Logic xử lý tính toán và xuất dữ liệu
 this.btn_calculate_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 {
+
 	var h_cm = this.ds_health_metrics.getColumn(0, "height");
 	var w_kg = this.ds_health_metrics.getColumn(0, "weight");
 	var hr = this.ds_health_metrics.getColumn(0, "heartrate");
 	var steps = this.ds_health_metrics.getColumn(0, "steps");
 	
-	// Bắt lỗi rỗng
 	if (!h_cm || !w_kg || !hr || !steps) {
 		alert("Please enter all 4 metrics for accurate analysis!");
 		return;
 	}
 	
-	// Tính BMI
 	var h_m = Number(h_cm) / 100;
 	var w = Number(w_kg);
 	var bmi = w / (h_m * h_m);
@@ -93,31 +50,28 @@ this.btn_calculate_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInf
 	var status = "";
 	var color = "";
 	var adviceText = "";
-	
-	// Phân tích BMI
+
 	if (bmi < 18.5) {
-		status = "UNDERWEIGHT"; color = "#f59e0b"; // Màu cam
+		status = "UNDERWEIGHT"; color = "#f59e0b";
 		adviceText += "- Weight: Need more protein and carbs.\n";
 	} else if (bmi >= 18.5 && bmi <= 24.9) {
-		status = "NORMAL"; color = "#059669"; // Màu xanh
+		status = "NORMAL"; color = "#059669";
 		adviceText += "- Weight: Ideal, keep it up!\n";
 	} else {
-		status = "OVERWEIGHT"; color = "#ef4444"; // Màu đỏ
+		status = "OVERWEIGHT"; color = "#ef4444";
 		adviceText += "- Weight: You need to reduce calorie intake.\n";
 	}
-	
-	// Phân tích Nhịp tim
+
 	var heartRate = Number(hr);
 	if (heartRate < 60) {
 		adviceText += "- Heart Rate: Slightly slow (" + heartRate + " bpm).\n";
 	} else if (heartRate > 100) {
 		adviceText += "- Heart Rate: Fast (" + heartRate + " bpm), please relax!\n";
-		status = "HEART WARNING"; color = "#b91c1c"; // Màu đỏ sậm
+		status = "HEART WARNING"; color = "#b91c1c"; // Cảnh báo đỏ nếu tim đập nhanh
 	} else {
 		adviceText += "- Heart Rate: Normal, stable rhythm.\n";
 	}
-	
-	// Phân tích Vận động
+
 	var stepCount = Number(steps);
 	if (stepCount < 5000) {
 		adviceText += "- Activity: Too low! Stand up and walk more.";
@@ -126,31 +80,13 @@ this.btn_calculate_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInf
 	} else {
 		adviceText += "- Activity: Excellent! You are very active.";
 	}
-	
-	// Cập nhật kết quả lên màn hình bên trái
+
 	this.sta_result_status.set_text(status);
 	this.sta_result_status.set_color(color);
 	this.sta_result_value.set_color(color);
 	this.sta_advice.set_text(adviceText);
-
-	// --- ĐỔ DỮ LIỆU XUỐNG GRID BÊN PHẢI ---
-	var today = new Date();
-	var dateStr = today.getDate() + "/" + (today.getMonth() + 1) + "/" + today.getFullYear();
-	
-	var nRow = this.ds_history.addRow();
-	this.ds_history.setColumn(nRow, "date", dateStr);
-	this.ds_history.setColumn(nRow, "height", h_cm);
-	this.ds_history.setColumn(nRow, "weight", w_kg);
-	this.ds_history.setColumn(nRow, "heartrate", hr);
-	this.ds_history.setColumn(nRow, "steps", steps);
-	this.ds_history.setColumn(nRow, "bmi", bmiRounded);
-	this.ds_history.setColumn(nRow, "status", status);
-	
-	// Gửi thẳng mã màu xuống Dataset để Grid tự tô màu
-	this.ds_history.setColumn(nRow, "colorCode", color); 
 };
 
-// 3. Xử lý Đăng xuất
 this.btn_logout_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 {
 	var isConfirm = confirm("Are you sure you want to logout?");
@@ -159,19 +95,7 @@ this.btn_logout_onclick = function(obj:nexacro.Button,e:nexacro.ClickEventInfo)
 		this.sta_result_value.set_text("--");
 		this.sta_result_status.set_text("No data available");
 		this.sta_advice.set_text("Please fill in all 4 metrics above and click Analyze.");
-		
 		this.getOwnerFrame().set_formurl("FrameBase::Form_Work.xfdl");
-	}
-};
-
-// 4. Xử lý Nút Xóa trên Grid
-this.grd_history_oncellclick = function(obj:nexacro.Grid,e:nexacro.GridClickEventInfo)
-{
-	if (e.col == 7) {
-		var isConfirm = confirm("Are you sure you want to delete this record?");
-		if (isConfirm) {
-			this.ds_history.deleteRow(e.row); 
-		}
 	}
 };]]></Script>
     <Objects>
@@ -185,18 +109,6 @@ this.grd_history_oncellclick = function(obj:nexacro.Grid,e:nexacro.GridClickEven
         <Rows>
           <Row/>
         </Rows>
-      </Dataset>
-      <Dataset id="ds_history">
-        <ColumnInfo>
-          <Column id="date" type="STRING" size="256"/>
-          <Column id="height" type="STRING" size="256"/>
-          <Column id="weight" type="STRING" size="256"/>
-          <Column id="heartrate" type="STRING" size="256"/>
-          <Column id="steps" type="STRING" size="256"/>
-          <Column id="bmi" type="STRING" size="256"/>
-          <Column id="status" type="STRING" size="256"/>
-          <Column id="colorCode" type="STRING" size="256"/>
-        </ColumnInfo>
       </Dataset>
     </Objects>
     <Bind>
